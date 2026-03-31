@@ -211,7 +211,11 @@ data/
 *.csv
 *.gz
 
-Ignore Python cache and system files
+# Ignore Python cache and system files
 __pycache__/
 *.pyc
 .DS_Store
+
+# Ignore SQL files
+*.sql
+

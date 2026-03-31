@@ -4,6 +4,7 @@ from api_extract import fetch_api_store_data, save_raw_data
 from snowflake_loader import load_to_snowflake
 from validate_db_load import validate_record_count
 from run_proc import run_transformation
+from generate_sales import generate_sales_data
 
 def run_pipeline():
 
@@ -23,6 +24,10 @@ def run_pipeline():
 
 # Run Merge procedure to move data from staging to final table
 	run_transformation()
+
+# Generate synthetic sales data and save to CSV
+	sales_df = generate_sales_data(num_records=1000)
+	save_raw_data(sales_df, "sales_raw.csv")
 
 if __name__ == "__main__":
 	run_pipeline()
