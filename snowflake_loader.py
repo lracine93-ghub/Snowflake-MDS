@@ -1,7 +1,7 @@
 import logging
 import os
 import snowflake.connector
-from config import config
+from config import Config
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -10,13 +10,13 @@ def get_snowflake_connection():
     """Establish a connection to Snoflake using credentials from the config"""
     try: 
         conn = snowflake.connector.connect(
-            user=config.SNOW_USER,
-            password=config.SNOW_PASS,
-            account=config.SNOW_ACCOUNT,
-            warehouse=config.SNOW_WAREHOUSE,
-            database=config.SNOW_DATABASE,
-            schema=config.SNOW_SCHEMA,
-            role=config.SNOW_ROLE
+            user=Config.SNOW_USER,
+            password=Config.SNOW_PASS,
+            account=Config.SNOW_ACCOUNT,
+            warehouse=Config.SNOW_WAREHOUSE,
+            database=Config.SNOW_DATABASE,
+            schema=Config.SNOW_SCHEMA,
+            role=Config.SNOW_ROLE
         )
         logging.info("Successfully connected to Snowflake")
         return conn
@@ -25,7 +25,7 @@ def get_snowflake_connection():
         raise 
 
 def load_to_snowflake(file_name: str, table_name: str, stage_name: str):
-    local_path = config.DATA_DIR / file_name
+    local_path = Config.DATA_DIR / file_name
 
     if not local_path.exists():
         logging.error(f"File {local_path} does not exist.")
@@ -44,9 +44,10 @@ def load_to_snowflake(file_name: str, table_name: str, stage_name: str):
         logging.info(f"Loading data from @{stage_name} to {table_name}...")
         copy_sql = f"""
         COPY INTO {table_name}
-        FROM @{stage_name}/{file_name}  
-        FILE_FORMAT = (TYPE = 'CSV' FIELD_DELIMITER = ',' SKIP_HEADER = 1)
+        FROM @{stage_name}/{file_name}.gz
+        FILE_FORMAT = (TYPE = 'CSV' FIELD_DELIMITER = ',' FIELD_OPTIONALLY_ENCLOSED_BY = '"' SKIP_HEADER = 1)
         ON_ERROR = 'CONTINUE'"""
+        
         cur.execute(copy_sql)
 
         logging.info(f"Data loaded successfully into {table_name}")

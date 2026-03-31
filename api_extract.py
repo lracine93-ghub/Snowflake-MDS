@@ -4,6 +4,8 @@ import logging
 import time
 from config import config, header
 from curl_cffi import requests as curl_requests
+import snowflake.connector
+ 
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -63,3 +65,32 @@ def save_raw_data(df: pd.DataFrame, filename: str):
 	filepath = config.DATA_DIR / filename
 	df.to_csv(filepath, index=False)
 	logging.info(f"Data saved to {filepath}")
+
+
+def upload_to_snowflake_db(df: pd.DataFrame, table_name: str):
+	'''Upload a DataFrame to Snowflake using the Snowflake Connector.'''
+	if df.empty:
+		logging.warning(f"No data to upload for {table_name}")
+		return
+
+	conn = snowflake.connector.connect(
+		user=config.SNOW_USER,
+		password=config.SNOW_PASS,
+		account=config.SNOW_ACCOUNT,
+		warehouse=config.SNOW_WAREHOUSE,
+		database=config.SNOW_DATABASE,
+		schema=config.SNOW_SCHEMA,
+		role=config.SNOW_ROLE
+	)
+
+	cursor = conn.cursor()
+	try:
+		for _, row in df.iterrows():
+			cursor.execute(f"PUT file://{config.DATA_DIR / 'products_raw.csv'} @%{table_name}")
+		conn.commit()
+		logging.info(f"Data uploaded to Snowflake table {table_name}")
+	except Exception as e:
+		logging.error(f"Error uploading to Snowflake: {e}")
+	finally:
+		cursor.close()
+		conn.close()
