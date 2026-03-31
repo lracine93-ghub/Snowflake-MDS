@@ -3,6 +3,7 @@ import logging
 from api_extract import fetch_api_store_data, save_raw_data
 from snowflake_loader import load_to_snowflake
 from validate_db_load import validate_record_count
+from run_proc import run_transformation
 
 def run_pipeline():
 
@@ -19,6 +20,9 @@ def run_pipeline():
 	
 # Validate the data load by counting records in the target Snowflake table
 	validate_record_count("STG_PRODUCTS_RAW")
+
+# Run Merge procedure to move data from staging to final table
+	run_transformation()
 
 if __name__ == "__main__":
 	run_pipeline()

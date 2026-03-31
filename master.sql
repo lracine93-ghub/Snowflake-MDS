@@ -50,3 +50,15 @@ CREATE OR REPLACE TABLE STG_PRODUCTS_RAW (
     image STRING,
     rating OBJECT -- Handles nested JSON data smoothly
 );
+
+
+CREATE OR REPLACE TABLE DIM_PRODUCTS
+    product_id INT PRIMARY KEY,
+    title  STRING,
+    price FLOAT,
+    description STRING,
+    rating:rate::FLOAT AS rating_score,
+    rating:count::INT AS rating_count-- Handles nested JSON data smoothly
+);
+
+
