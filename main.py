@@ -2,7 +2,7 @@ import logging
 
 from api_extract import fetch_api_store_data, save_raw_data
 from snowflake_loader import load_to_snowflake, load_sales_to_snowflake
-from validate_db_load import validate_record_count
+from validate_db_load import validate_record_count, validate_star_schema
 from run_proc import run_transformation
 from generate_sales import generate_sales_data
 
@@ -35,5 +35,8 @@ def run_pipeline():
 # Validate the sales data load by counting records in the target Snowflake table
 	validate_record_count("STG_SALES_RAW")		
 
+# Validate the star schema structure by running a sample query that joins fact and dimension tables
+	validate_star_schema()
+	
 if __name__ == "__main__":
 	run_pipeline()

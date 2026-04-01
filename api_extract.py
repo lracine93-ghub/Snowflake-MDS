@@ -1,9 +1,13 @@
+import os
+
 import pandas as pd
 import requests
 import logging
 import time
 from config import config, header
 from curl_cffi import requests as curl_requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 import snowflake.connector
  
 
@@ -29,7 +33,7 @@ def fetch_api_store_data(endpoint: str, max_retries=5, initial_delay=1) -> pd.Da
 			status = e.response.status_code if e.response is not None else None
 			logging.warning(f"HTTP {status} on attempt {attempt}: {e}")
 
-			if status in (403, 429, 500, 502, 503, 504):
+			if status is None or status in (403, 429, 500, 502, 503, 504, 523, 524):
 				if attempt == max_retries:
 					logging.error("Max retries reached. Returning empty DataFrame.")
 					break
@@ -56,6 +60,9 @@ def fetch_api_store_data(endpoint: str, max_retries=5, initial_delay=1) -> pd.Da
 			break
 
 	return pd.DataFrame()
+
+
+
 
 def save_raw_data(df: pd.DataFrame, filename: str):
 	'''Save the raw DataFrame to a CSV file in the data directory.'''
@@ -85,8 +92,12 @@ def upload_to_snowflake_db(df: pd.DataFrame, table_name: str):
 
 	cursor = conn.cursor()
 	try:
-		for _, row in df.iterrows():
-			cursor.execute(f"PUT file://{config.DATA_DIR / 'products_raw.csv'} @%{table_name}")
+# Stage the file in Snowflake
+		file_abs_path = os.path.abspath(config.DATA_DIR / 'products_raw.csv')
+		cursor.execute(f"PUT file://{file_abs_path} @%{table_name}")
+
+# Move data from stage to Snowflake table
+		cursor.execute(f"COPY INTO {table_name} FROM @%{table_name} FILE_FORMAT = (TYPE = 'CSV' FIELD_OPTIONALLY_ENCLOSED_BY = '\"' SKIP_HEADER = 1) ON_ERROR = 'CONTINUE'")
 		conn.commit()
 		logging.info(f"Data uploaded to Snowflake table {table_name}")
 	except Exception as e:

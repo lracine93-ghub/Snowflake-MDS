@@ -26,7 +26,40 @@ def validate_record_count(table_name: str):
         logging.error(f"Data load into {table_name} validation failed: {e}")
     finally:
         cur.close()
-        conn.close()    
-    
-    if __name__ == "__main__":
-        validate_record_count("STG_PRODUCTS_RAW")
+        conn.close()
+
+
+def validate_star_schema():
+    logging.info("Validating star schema structure in Snowflake...")
+
+    query = """
+    SELECT 
+        p.category,
+        COUNT(f.sales_id) AS total_orders,
+        SUM(f.qty) AS total_items_sold,
+        ROUND(SUM(f.total_amt), 2) AS total_revenue
+    FROM SALES_ANALYTICS.CORE.FACT_SALES f
+    JOIN SALES_ANALYTICS.CORE.DIM_PRODUCTS p 
+    ON f.product_id = p.product_id
+    GROUP BY p.category
+    ORDER BY total_revenue DESC
+    LIMIT 5;"""
+
+    conn = get_snowflake_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(query)
+        results = cur.fetchall()
+
+        logging.info("Star schema validation query executed successfully. Sample results:")
+        for row in results:  # Print first 5 rows of the result
+            logging.info(row)
+    except Exception as e:
+        logging.error(f"Star schema validation failed: {e}")
+    finally:
+        cur.close()
+        conn.close()
+
+
+if __name__ == "__main__":
+    validate_record_count("STG_PRODUCTS_RAW")
