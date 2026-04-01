@@ -8,7 +8,7 @@ import numpy as np
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def generate_sales_data(num_records=1000):
+def generate_sales_data(num_records=5000):
     logging.info(f"Generating {num_records} sales records.")
     
     file_name = "products_raw.csv"
@@ -21,18 +21,26 @@ def generate_sales_data(num_records=1000):
 
     # Generate random sales data
     sales_data = []
-    for i in range(num_records):
+    for i in range(1, num_records + 1):
         product_id = random.choice(product_ids)
         quantity = random.randint(1, 10)
-        total_price = quantity * product_prices[product_id]
-        sale_date = dt.now() - timedelta(days=random.randint(0, 180))  # Sales from the last 6 months
+        total_price = round(quantity * product_prices[product_id], 2)
+        unit_price = product_prices[product_id]
+        start_date = dt.now() - timedelta(days=random.randint(0, 180))  # Sales from the last 6 months
+
+        # Generate a random sale date and time within the last 6 months
+        random_hours = random.randint(0, 23)
+        random_days = random.randint(0, 180)  # Random time on the sale date
+        sales_date = start_date + timedelta(days=random_days, hours=random_hours)  # Random time on the sale date
         
         sales_data.append({
-            "sale_id": f"S{1000 + i}",
+            "sales_id": f"{1000 + i}",
             "product_id": product_id,
-            "quantity": quantity,
-            "total_price": total_price,
-            "sale_date": sale_date.strftime("%Y-%m-%d %H:%M:%S")
+            "qty": quantity,
+            "unit_price": unit_price, 
+            "total_amt": total_price,
+            "sale_date": sales_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "cust_id": f"10{random.randint(1000, 9999)}"
         })
 
     sales_df = pd.DataFrame(sales_data)

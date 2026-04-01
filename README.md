@@ -49,8 +49,8 @@ To elevate this project beyond a standard beginner tutorial, specific architectu
 
 1. **Clone the repository:**
    ```bash
-   git clone <your-github-repo-link>
-   cd <your-repo-name>
+   git clone https://github.com/lracine93-ghub/Snowflake-MDS
+   cd Snowflake-MDS
 2. **Install Dependencies**
     ```bash
     pip install -r requirements.txt

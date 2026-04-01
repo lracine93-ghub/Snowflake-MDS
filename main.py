@@ -1,7 +1,7 @@
 import logging
 
 from api_extract import fetch_api_store_data, save_raw_data
-from snowflake_loader import load_to_snowflake
+from snowflake_loader import load_to_snowflake, load_sales_to_snowflake
 from validate_db_load import validate_record_count
 from run_proc import run_transformation
 from generate_sales import generate_sales_data
@@ -26,8 +26,14 @@ def run_pipeline():
 	run_transformation()
 
 # Generate synthetic sales data and save to CSV
-	sales_df = generate_sales_data(num_records=1000)
+	sales_df = generate_sales_data(5000)
 	save_raw_data(sales_df, "sales_raw.csv")
+
+# LOAD the sales data to Snowflake
+	load_sales_to_snowflake("sales_raw.csv", "STG_SALES_RAW", "api_landing_zone", "FACT_SALES")
+
+# Validate the sales data load by counting records in the target Snowflake table
+	validate_record_count("STG_SALES_RAW")		
 
 if __name__ == "__main__":
 	run_pipeline()
