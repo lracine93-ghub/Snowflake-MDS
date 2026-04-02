@@ -5,7 +5,7 @@ import snowflake.connector
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def create_reporting_views():
-    """Establish a connection to Snoflake using credentials from the config"""
+    """Establish a connection to Snowflake using credentials from the config"""
    
     conn = snowflake.connector.connect(
         user=Config.SNOW_USER,
@@ -30,15 +30,15 @@ def create_reporting_views():
         WITH rankedSales AS (
             SELECT 
                 dp.CATEGORY,
-                DP.TITLE,
-                SUM(fs.QTY) AS TOTAL_QTY,
+                DP.TITLE AS PRODUCT_NAME,
+                SUM(fs.QTY) AS TOTAL_UNITS_SOLD,
                 DENSE_RANK() OVER (PARTITION BY dp.CATEGORY ORDER BY SUM(fs.QTY) DESC) AS SALES_RANK
             FROM SALES_ANALYTICS.CORE.FACT_SALES AS fs
             JOIN SALES_ANALYTICS.CORE.DIM_PRODUCTS AS dp
                 ON fs.PRODUCT_ID = dp.PRODUCT_ID
             GROUP BY  dp.CATEGORY, dp.TITLE
         )
-        SELECT  CATEGORY, TOTAL_QTY, TITLE, SALES_RANK
+        SELECT  CATEGORY, TOTAL_UNITS_SOLD, PRODUCT_NAME, SALES_RANK
         FROM rankedSales
         WHERE SALES_RANK <= 3
         ; """

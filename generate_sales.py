@@ -23,7 +23,7 @@ def generate_sales_data(num_records=5000):
     sales_data = []
     for i in range(1, num_records + 1):
         product_id = random.choice(product_ids)
-        quantity = random.randint(1, 10)
+        quantity = random.randint(1, 5)
         total_price = round(quantity * product_prices[product_id], 2)
         unit_price = product_prices[product_id]
         start_date = dt.now() - timedelta(days=random.randint(0, 180))  # Sales from the last 6 months

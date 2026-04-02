@@ -2,6 +2,9 @@
 __pycache__/
 *.py[codz]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
 
 # C extensions
 *.so
@@ -210,11 +213,13 @@ __marimo__/
 data/
 *.csv
 *.gz
+*.csv.gz
 
-# Ignore Python cache and system files
-__pycache__/
-*.pyc
+
+# Ignore OS-SPECIFIC files
+
 .DS_Store
+Thumbs.db
 
 # Ignore SQL files
 *.sql
