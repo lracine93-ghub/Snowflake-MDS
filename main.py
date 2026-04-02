@@ -5,6 +5,7 @@ from snowflake_loader import load_to_snowflake, load_sales_to_snowflake
 from validate_db_load import validate_record_count, validate_star_schema
 from run_proc import run_transformation
 from generate_sales import generate_sales_data
+from create_views import create_reporting_views
 
 def run_pipeline():
 
@@ -31,6 +32,9 @@ def run_pipeline():
 
 # LOAD the sales data to Snowflake
 	load_sales_to_snowflake("sales_raw.csv", "STG_SALES_RAW", "api_landing_zone", "FACT_SALES")
+
+# Create reporting views in Snowflake for analytics
+	create_reporting_views()
 
 # Validate the sales data load by counting records in the target Snowflake table
 	validate_record_count("STG_SALES_RAW")		
