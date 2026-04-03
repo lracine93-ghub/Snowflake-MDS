@@ -78,12 +78,17 @@ A modular approach was taken to ensure high maintainability, isolated testing, a
     Create a .env file in the root directory and add your Snowflake and API credentials:
     
     SNOW_USER={your_username}
-    
+
     SNOW_PASS={your_password}
+
     SNOW_ACCOUNT={your_account_locator}
+
     SNOW_WAREHOUSE=COMPUTE_WH
+
     SNOW_DATABASE=SALES_ANALYTICS
+
     SNOW_SCHEMA=CORE
+    
     SNOW_ROLE=ACCOUNTADMIN
 
 5. **Execute the Pipeline 🚀**
