@@ -3,11 +3,6 @@ An end-to-end ELT (Extract, Load, Transform) data pipeline that orchestrates aut
 
 ---
 
-## 📌 Project Overview
-This project demonstrates a production-grade data engineering workflow designed for a 2-month delivery timeline. It solves the challenge of capturing rapidly changing product and transactional data, centralizing it in a high-performance cloud data warehouse, and modeling it for advanced business intelligence.
-
----
-
 ## 🏗️ Architecture & Tech Stack
 * **Extraction:** Python script using `curl_cffi` to impersonate browser TLS fingerprints, cleanly bypassing Cloudflare edge bot    detection to fetch products from a public mock REST API.
 * **Generation:** Python script generating 5,000+ localized, relationally-sound transactional records to simulate a high-traffic retail environment.
