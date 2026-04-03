@@ -77,7 +77,8 @@ A modular approach was taken to ensure high maintainability, isolated testing, a
 4. **Configure environment variables**
     Create a .env file in the root directory and add your Snowflake and API credentials:
     
-    SNOW_USER={your_username} \n
+    SNOW_USER={your_username}
+    
     SNOW_PASS={your_password}
     SNOW_ACCOUNT={your_account_locator}
     SNOW_WAREHOUSE=COMPUTE_WH
