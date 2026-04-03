@@ -7,52 +7,55 @@ from run_proc import run_transformation
 from generate_sales import generate_sales_data
 from create_views import create_reporting_views
 
+logging.info("-----PIPELINE COMMENCING...-----")	
 def run_pipeline():
 
-	###--------------------- STEP 1: EXTRACTION ---------------------###
+###--------------------- STEP 1: EXTRACTION ---------------------###
 
-	logging.info("Pipeline commencing...")
+
 
 # Exract data from FakeStore API and save to a local CSV file
-products_df = fetch_api_store_data("products")
-print(products_df.shape)
-if not products_df.empty:
-	logging.info(products_df.head())
+	products_df = fetch_api_store_data("products")
+	print(products_df.shape)
+	if not products_df.empty:
+		logging.info(products_df.head())
 
-save_raw_data(products_df, "products_raw.csv")
-
+	save_raw_data(products_df, "products_raw.csv")
+	
 ###--------------------- STEP 2: LOAD ---------------------###
 
 # Load the CSV file to Snowflake
-load_to_snowflake("products_raw.csv", "STG_PRODUCTS_RAW", "api_landing_zone")
+	load_to_snowflake("products_raw.csv", "STG_PRODUCTS_RAW", "api_landing_zone")
+	
 
 ###--------------------- STEP 3: TRANSFORMATION ---------------------###
 
 # Run Merge procedure to move data from staging to CORE table
-run_transformation()
+	run_transformation()
 
 # Generate synthetic sales data and save to CSV
-sales_df = generate_sales_data(5000)
-save_raw_data(sales_df, "sales_raw.csv")
+	sales_df = generate_sales_data(5000)
+	save_raw_data(sales_df, "sales_raw.csv")
 
 # upload the sales data to Snowflake
-load_sales_to_snowflake("sales_raw.csv", "STG_SALES_RAW", "api_landing_zone", "FACT_SALES")
+	load_sales_to_snowflake("sales_raw.csv", "STG_SALES_RAW", "api_landing_zone", "FACT_SALES")
 
 # Create reporting views in Snowflake for analytics
-create_reporting_views()
+	create_reporting_views()
 
 ###--------------------- STEP 4: VALIDATION ---------------------###
 
 # Validate the data load by counting records in the target Snowflake table
-validate_record_count("STG_PRODUCTS_RAW")
+	validate_record_count("STG_PRODUCTS_RAW")
 
 # Validate the sales data load by counting records in the target Snowflake table
-validate_record_count("STG_SALES_RAW")
+	validate_record_count("STG_SALES_RAW")		
 
 # Validate the star schema structure by running a sample query that joins fact and dimension tables
-validate_star_schema()
+	validate_star_schema()
 
-logging.info("Pipeline execution completed successfully!")
+
 
 if __name__ == "__main__":
 	run_pipeline()
+	logging.info("-----PIPELINE EXECUTION COMPLETED SUCCESSFULLY-----!")

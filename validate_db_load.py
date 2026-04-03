@@ -51,9 +51,11 @@ def validate_star_schema():
         cur.execute(query)
         results = cur.fetchall()
 
-        logging.info("Star schema validation query executed successfully. Sample results:")
+        logging.info("Star schema validation query executed successfully!")
+        logging.info("*******************TEST SAMPLE*********************")
         for row in results:  # Print first 5 rows of the result
             logging.info(row)
+        logging.info("*******************TEST SAMPLE*********************")        
     except Exception as e:
         logging.error(f"Star schema validation failed: {e}")
     finally:
