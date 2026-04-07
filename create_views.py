@@ -1,23 +1,19 @@
 import logging
-from config import Config
-import snowflake.connector  
+from config import Config, get_snowflake_connection
+import snowflake.connector
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def create_reporting_views():
     """Establish a connection to Snowflake using credentials from the config"""
    
-    conn = snowflake.connector.connect(
-        user=Config.SNOW_USER,
-        password=Config.SNOW_PASS,
-        account=Config.SNOW_ACCOUNT,
-        warehouse=Config.SNOW_WAREHOUSE,
-        database=Config.SNOW_DATABASE,
-        schema=Config.SNOW_SCHEMA,
-        role=Config.SNOW_ROLE
-    )
-    cursor = conn.cursor()
+    conn = get_snowflake_connection()
 
+    if not conn:
+        logging.error("Failed to establish connection to Snowflake. Cannot create views.")
+        return
+    cursor = conn.cursor()
+  
     try:
         logging.info("Creating reporting views in Snowflake...")
         # CREATE SCHEMA FOR ANALYTICS 

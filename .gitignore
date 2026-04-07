@@ -224,3 +224,7 @@ Thumbs.db
 # Ignore SQL files
 *.sql
 
+# Ignore RSA key files
+snowflake_private_key.p8
+# snowflake_public_key.pub
+

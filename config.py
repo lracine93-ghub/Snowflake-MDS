@@ -1,6 +1,11 @@
 import os
+import logging
 from pathlib import Path
+
 from dotenv import load_dotenv
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+import snowflake.connector
 
 # Locate the directory of this file to find the .env
 env_path = Path('.') / '.env'
@@ -17,6 +22,10 @@ class Config:
     SNOW_DATABASE = os.getenv('SNOW_DATABASE')
     SNOW_SCHEMA = os.getenv('SNOW_SCHEMA')
     SNOW_ROLE = os.getenv('SNOW_ROLE')
+
+    # Snowflake Private Key Settings
+    SNOW_PKEY_PATH = os.getenv('SNOW_PRIVATE_KEY_PATH')
+    SNOW_PKEY_PASSPHRASE = os.getenv('SNOW_PKEY_PASSPHRASE')
     
     # API Settings
     API_BASE_URL = os.getenv('SALES_API_URL')
@@ -30,6 +39,35 @@ class Config:
 
 # Instantiate config for use in other files
 config = Config()
+
+def get_snowflake_connection():
+    """Establish a connection to Snowflake using credentials from the config and Key Pair Authentication."""
+    try:
+        with open(Config.SNOW_PKEY_PATH, "rb") as key_file:
+            private_key = serialization.load_pem_private_key(
+                key_file.read(),
+                password=Config.SNOW_PKEY_PASSPHRASE.encode(),
+            )
+        private_key_der = private_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        conn = snowflake.connector.connect(
+            user=Config.SNOW_USER,
+            account=Config.SNOW_ACCOUNT,
+            warehouse=Config.SNOW_WAREHOUSE,
+            database=Config.SNOW_DATABASE,
+            schema=Config.SNOW_SCHEMA,
+            role=Config.SNOW_ROLE,
+            # private_key_content=Config.SNOW_PKEY_PATH,
+            # private_key_passphrase=Config.SNOW_PKEY_PASSPHRASE,
+            private_key=private_key_der
+        )
+        return conn
+    except Exception as e:
+        logging.error(f"Error connecting to Snowflake: {e}")
+        return None
 
 def header():
     """Return a standard header for API requests."""

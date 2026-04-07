@@ -16,7 +16,8 @@ def get_snowflake_connection():
             warehouse=Config.SNOW_WAREHOUSE,
             database=Config.SNOW_DATABASE,
             schema=Config.SNOW_SCHEMA,
-            role=Config.SNOW_ROLE
+            role=Config.SNOW_ROLE,
+            passphrase=Config.SNOW_PKEY_PASSPHRASE
         )
         logging.info("Successfully connected to Snowflake")
         return conn

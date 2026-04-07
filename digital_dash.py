@@ -1,9 +1,10 @@
 import logging
 import os
-from config import Config   
+from config import Config, get_snowflake_connection
 import streamlit as st
 import pandas as pd
 import snowflake.connector
+from cryptography.hazmat.primitives import serialization
 
 # Set up page configuration 
 st.set_page_config(
@@ -16,21 +17,18 @@ st.title("Cloud-Native Sales Analytics Dashboard")
 st.markdown("""Visualize real-time data pipeline ingestions and modeled database views.""")
 
 @st.cache_resource # Cache the Snowflake connection to reuse across interactions
-def get_snowflake_connection():
-    return snowflake.connector.connect(
-        user=Config.SNOW_USER,
-        password=Config.SNOW_PASS,
-        account=Config.SNOW_ACCOUNT,
-        warehouse=Config.SNOW_WAREHOUSE,
-        database=Config.SNOW_DATABASE,
-        schema=Config.SNOW_SCHEMA,
-        role=Config.SNOW_ROLE
-    )
+def get_cached_conn():
+    return get_snowflake_connection()
 
+conn = get_cached_conn()
+
+if conn is not None:
+    logging.info("Successfully connected to Snowflake for dashboard.")
+else:
+    logging.error("Failed to connect to Snowflake for dashboard.")   
+ 
 try:
-    conn = get_snowflake_connection()
-
-    # Sidebar Filter
+     # Sidebar Filter
     st.sidebar.header("Dashboard Filters")
 
     # FIX 1 & 3: Use the native connection directly with Pandas!
