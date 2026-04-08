@@ -7,14 +7,14 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import snowflake.connector
 
-# Locate the directory of this file to find the .env
+# LOCATE THE DIRECTORY OF THIS FILE TO FIND THE .ENV
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
 
 class Config:
     """Centralized configuration management for the ETL pipeline."""
     
-    # Snowflake Settings
+    # SNOWFLAKE SETTINGS
     SNOW_USER = os.getenv('SNOW_USER')
     SNOW_PASS = os.getenv('SNOW_PASS')
     SNOW_ACCOUNT = os.getenv('SNOW_ACCOUNT')
@@ -23,21 +23,21 @@ class Config:
     SNOW_SCHEMA = os.getenv('SNOW_SCHEMA')
     SNOW_ROLE = os.getenv('SNOW_ROLE')
 
-    # Snowflake Private Key Settings
+    # SNOWFLAKE PRIVATE KEY SETTINGS
     SNOW_PKEY_PATH = os.getenv('SNOW_PRIVATE_KEY_PATH')
     SNOW_PKEY_PASSPHRASE = os.getenv('SNOW_PKEY_PASSPHRASE')
     
-    # API Settings
+    # API SETTINGS
     API_BASE_URL = os.getenv('SALES_API_URL')
     
-    # Local Paths
+    # LOCAL PATHS
     BASE_DIR = Path(__file__).resolve().parent
     DATA_DIR = BASE_DIR / "data"
     
-    # Create data directory if it doesn't exist
+    # CREATE DATA DIRECTORY IF IT DOESN'T EXIST
     DATA_DIR.mkdir(exist_ok=True)
 
-# Instantiate config for use in other files
+# INSTANTIATE CONFIG FOR USE IN OTHER FILES
 config = Config()
 
 def get_snowflake_connection():
@@ -60,8 +60,8 @@ def get_snowflake_connection():
             database=Config.SNOW_DATABASE,
             schema=Config.SNOW_SCHEMA,
             role=Config.SNOW_ROLE,
-            # private_key_content=Config.SNOW_PKEY_PATH,
-            # private_key_passphrase=Config.SNOW_PKEY_PASSPHRASE,
+            # PRIVATE_KEY_CONTENT=CONFIG.SNOW_PKEY_PATH,
+            # PRIVATE_KEY_PASSPHRASE=CONFIG.SNOW_PKEY_PASSPHRASE,
             private_key=private_key_der
         )
         return conn

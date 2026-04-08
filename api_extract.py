@@ -11,11 +11,12 @@ from urllib3.util import Retry
 import snowflake.connector
  
 
-# Configure logging
+# CONFIGURE LOGGING
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# FETCH DATA FROM FAKESTORE API WITH RETRY/BACKOFF AND ANTI-BOT DETECTION TO REDUCE 403/429/523/524 RISK.
 def fetch_api_store_data(endpoint: str, max_retries=5, initial_delay=1) -> pd.DataFrame:
-	"""Fetch data from FakeStore API with retry/backoff to reduce 403/429 risk."""
+
 	url = f"https://fakestoreapi.com/{endpoint}"
 	delay = initial_delay
 
@@ -61,9 +62,7 @@ def fetch_api_store_data(endpoint: str, max_retries=5, initial_delay=1) -> pd.Da
 
 	return pd.DataFrame()
 
-
-
-
+# SAVE THE RAW DATA TO A CSV FILE IN THE (LOCAL) DATA DIRECTORY
 def save_raw_data(df: pd.DataFrame, filename: str):
 	'''Save the raw DataFrame to a CSV file in the data directory.'''
 	if df.empty:
@@ -74,34 +73,3 @@ def save_raw_data(df: pd.DataFrame, filename: str):
 	logging.info(f"Data saved to {filepath}")
 
 
-def upload_to_snowflake_db(df: pd.DataFrame, table_name: str):
-	'''Upload a DataFrame to Snowflake using the Snowflake Connector.'''
-	if df.empty:
-		logging.warning(f"No data to upload for {table_name}")
-		return
-
-	conn = snowflake.connector.connect(
-		user=config.SNOW_USER,
-		password=config.SNOW_PASS,
-		account=config.SNOW_ACCOUNT,
-		warehouse=config.SNOW_WAREHOUSE,
-		database=config.SNOW_DATABASE,
-		schema=config.SNOW_SCHEMA,
-		role=config.SNOW_ROLE
-	)
-
-	cursor = conn.cursor()
-	try:
-# Stage the file in Snowflake
-		file_abs_path = os.path.abspath(config.DATA_DIR / 'products_raw.csv')
-		cursor.execute(f"PUT file://{file_abs_path} @%{table_name}")
-
-# Move data from stage to Snowflake table
-		cursor.execute(f"COPY INTO {table_name} FROM @%{table_name} FILE_FORMAT = (TYPE = 'CSV' FIELD_OPTIONALLY_ENCLOSED_BY = '\"' SKIP_HEADER = 1) ON_ERROR = 'CONTINUE'")
-		conn.commit()
-		logging.info(f"Data uploaded to Snowflake table {table_name}")
-	except Exception as e:
-		logging.error(f"Error uploading to Snowflake: {e}")
-	finally:
-		cursor.close()
-		conn.close()

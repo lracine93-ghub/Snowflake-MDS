@@ -6,7 +6,7 @@ import pandas as pd
 import snowflake.connector
 from cryptography.hazmat.primitives import serialization
 
-# Set up page configuration 
+# SET UP PAGE CONFIGURATION 
 st.set_page_config(
     page_title="Sales Analytics Dashboard", 
     page_icon="📊",
@@ -16,7 +16,7 @@ st.set_page_config(
 st.title("Cloud-Native Sales Analytics Dashboard")
 st.markdown("""Visualize real-time data pipeline ingestions and modeled database views.""")
 
-@st.cache_resource # Cache the Snowflake connection to reuse across interactions
+@st.cache_resource # CACHE THE SNOWFLAKE CONNECTION TO REUSE ACROSS INTERACTIONS
 def get_cached_conn():
     return get_snowflake_connection()
 
@@ -28,19 +28,19 @@ else:
     logging.error("Failed to connect to Snowflake for dashboard.")   
  
 try:
-     # Sidebar Filter
+     # SIDEBAR FILTER
     st.sidebar.header("Dashboard Filters")
 
-    # FIX 1 & 3: Use the native connection directly with Pandas!
+    # FIX 1 & 3: USE THE NATIVE CONNECTION DIRECTLY WITH PANDAS!
     category_df = pd.read_sql("SELECT DISTINCT CATEGORY FROM SALES_ANALYTICS.CORE.DIM_PRODUCTS;", con=conn)
     
-    # Capitalizing the column key because Snowflake returns it uppercase
+    # CAPITALIZING THE COLUMN KEY BECAUSE SNOWFLAKE RETURNS IT UPPERCASE
     selected_category = st.sidebar.selectbox("Select a Product Category", category_df['CATEGORY'].tolist())
 
-    # Main Metric Cards
+    # MAIN METRIC CARDS
     st.subheader(f"Top 3 Performing Products by Category: {selected_category}")
 
-    # Query to fetch top 3 products for the selected category
+    # QUERY TO FETCH TOP 3 PRODUCTS FOR THE SELECTED CATEGORY
     top_products_query = """
         SELECT PRODUCT_NAME, TOTAL_UNITS_SOLD
         FROM SALES_ANALYTICS.ANALYTICS.vw_Sales_By_Prod_Ctgry
@@ -66,11 +66,11 @@ try:
 
     st.markdown("---")  
 
-    # Month-over-Month Sales Revenue Growth
+    # MONTH-OVER-MONTH SALES REVENUE GROWTH
     st.subheader("Month-over-Month Sales Revenue Growth")  
     st.markdown("This line chart shows the percentage growth in sales revenue compared to the previous month. Hover over the points to see exact values.")
 
-    # FIX 2: Swapping to standard Snowflake uppercase columns
+    # FIX 2: SWAPPING TO STANDARD SNOWFLAKE UPPERCASE COLUMNS
     mom_df = pd.read_sql("""
         SELECT SALES_MONTH, MOM_GRWTH_PCT 
         FROM SALES_ANALYTICS.ANALYTICS.vw_Month_to_Month_Revenue 
@@ -78,13 +78,13 @@ try:
     """, con=conn)
     
     if not mom_df.empty:
-        # Format the date properly
+        # FORMAT THE DATE PROPERLY
         mom_df['SALES_MONTH'] = pd.to_datetime(mom_df['SALES_MONTH']).dt.strftime('%b %Y')
         
-        # We set the INDEX to the month (X-axis)
+        # WE SET THE INDEX TO THE MONTH (X-AXIS)
         chart_data = mom_df.set_index('SALES_MONTH')
 
-        # We plot the MOM_GRWTH_PCT (Y-axis)
+        # WE PLOT THE MOM_GRWTH_PCT (Y-AXIS)
         st.line_chart(chart_data, y="MOM_GRWTH_PCT", height=400)
     else:
         st.info("No sales revenue data available yet.")

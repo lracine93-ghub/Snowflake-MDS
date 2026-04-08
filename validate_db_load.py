@@ -53,7 +53,7 @@ def validate_star_schema():
 
         logging.info("Star schema validation query executed successfully!")
         logging.info("*******************TEST SAMPLE*********************")
-        for row in results:  # Print first 5 rows of the result
+        for row in results:  # PRINT FIRST 5 ROWS OF THE RESULT
             logging.info(row)
         logging.info("*******************TEST SAMPLE*********************")        
     except Exception as e:

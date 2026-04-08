@@ -1,29 +1,10 @@
 import logging
 import os
 import snowflake.connector
-from config import Config
+from config import Config, get_snowflake_connection
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-def get_snowflake_connection():
-    """Establish a connection to Snoflake using credentials from the config"""
-    try: 
-        conn = snowflake.connector.connect(
-            user=Config.SNOW_USER,
-            password=Config.SNOW_PASS,
-            account=Config.SNOW_ACCOUNT,
-            warehouse=Config.SNOW_WAREHOUSE,
-            database=Config.SNOW_DATABASE,
-            schema=Config.SNOW_SCHEMA,
-            role=Config.SNOW_ROLE,
-            passphrase=Config.SNOW_PKEY_PASSPHRASE
-        )
-        logging.info("Successfully connected to Snowflake")
-        return conn
-    except Exception as e:
-        logging.error(f"Error connecting to Snowflake: {e}")
-        raise 
 
 def load_to_snowflake(file_name: str, table_name: str, stage_name: str):
     local_path = Config.DATA_DIR / file_name
@@ -36,12 +17,12 @@ def load_to_snowflake(file_name: str, table_name: str, stage_name: str):
     try:
         cur = conn.cursor()
 
-        # PUT file to Snowflake stage
+        # PUT FILE TO SNOWFLAKE STAGE
 
         logging.info(f"Staging {file_name} to @{stage_name}...")
         cur.execute(f"PUT file://{os.path.abspath(local_path)} @{stage_name} OVERWRITE=TRUE")
         
-        # LOAD data from stage to Snowflake table
+        # LOAD DATA FROM STAGE TO SNOWFLAKE TABLE
         logging.info(f"Loading data from @{stage_name} to {table_name}...")
         copy_sql = f"""
         COPY INTO {table_name}
@@ -71,12 +52,12 @@ def load_sales_to_snowflake(file_name: str, table_name: str, stage_name: str, co
     try:
         cur = conn.cursor()
 
-        # PUT file to Snowflake stage
+        # PUT FILE TO SNOWFLAKE STAGE
 
         logging.info(f"Staging {file_name} to @{stage_name}...")
         cur.execute(f"PUT file://{os.path.abspath(local_path)} @{stage_name} OVERWRITE=TRUE")
         
-        # LOAD data from stage to Snowflake table
+        # LOAD DATA FROM STAGE TO SNOWFLAKE TABLE
         logging.info(f"Loading data from @{stage_name} to {table_name}...")
         copy_sql = f"""
         COPY INTO SALES_ANALYTICS.STAGING.{table_name}
