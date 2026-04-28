@@ -25,6 +25,24 @@ To elevate this project beyond a standard beginner tutorial, specific architectu
 
 **Zero-Trust Credential Security**: Isolated all database credentials and warehouse keys via .env masking, ensuring zero sensitive data ever leaked into public source control history.
 
+## 🛡️ Security & Governance
+
+This project implements a "Security-First" architecture, focusing on protecting business intelligence assets and ensuring verifiable data integrity through the following controls:
+
+### 🔐 RSA 2048-bit Key-Pair Authentication
+To eliminate the risks of static passwords and "secret sprawl," the pipeline utilizes asymmetric cryptography for all Snowflake interactions.
+* **Implementation:** The Python-to-Snowflake handshake is handled via JWT (JSON Web Tokens) signed by a local private key.
+* **Benefit:** Provides non-phishable, machine-to-machine authentication. Private keys are stored in encrypted local environments and are explicitly excluded from version control via `.gitignore`.
+
+### 👥 Role-Based Access Control (RBAC)
+Database access is strictly partitioned to enforce the **Principle of Least Privilege (PoLP)**.
+* **`INGESTOR_ROLE`**: Limited to `USAGE` on compute resources and `INSERT/UPDATE` on the Staging/Core layers. It cannot drop tables or view administrative metadata.
+
+### 🕵️ Automated Audit Logging
+Transparency is maintained through a dedicated **Pipeline Audit** dashboard that monitors warehouse activity.
+* **Implementation:** Streamlit queries the `INFORMATION_SCHEMA.QUERY_HISTORY` to track execution patterns.
+* **Benefit:** Provides a real-time "paper trail" for all automated actions, allowing for immediate detection of unauthorized query patterns or performance anomalies.
+
 ## 🛠️ Tech Stack
 
 * **Language:** Python 3.x

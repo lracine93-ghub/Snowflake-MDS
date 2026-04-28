@@ -23,11 +23,11 @@ def get_cached_conn():
 
 conn = get_cached_conn()
 
-if conn is not None:
-    logging.info("Successfully connected to Snowflake for dashboard.")
+if conn:
+    st.sidebar.success("🟢 Connected to Live Snowflake Warehouse")
 else:
-    logging.error("Failed to connect to Snowflake for dashboard.")   
- 
+    st.sidebar.warning("🟡 Offline Mode: Using Cached Sample Data")
+     
 try:
      # QUERY HISTORY DASHBOARD
     st.subheader("🛠️ Pipeline Audit: Query Performance")
