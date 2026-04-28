@@ -4,11 +4,11 @@ An end-to-end ELT (Extract, Load, Transform) data pipeline that orchestrates aut
 ---
 
 ## 🏗️ Architecture & Tech Stack
-* **Extraction:** Python script using `curl_cffi` to impersonate browser TLS fingerprints, cleanly bypassing Cloudflare edge bot    detection to fetch products from a public mock REST API.
+* **Extraction:** Python script using `curl_cffi` to impersonate browser TLS fingerprints, cleanly bypassing Cloudflare edge bot detection to fetch products from a public mock REST API.
 * **Generation:** Python script generating 5,000+ localized, relationally-sound transactional records to simulate a high-traffic retail environment.
 * **Orchestration & Load:** Master `main.py` pipeline utilizing the native Snowflake Connector to compress and bulk-stream local CSV files into Snowflake internal stages and execute `COPY INTO` commands.
 * **Transformation:** Multi-layered database modeling in Snowflake (Staging -> Core Star Schema -> Analytics Reporting Views) utilizing complex analytical calculations such as `DENSE_RANK()` and `LAG()`.
-* **Presentation:** A full-stack, real-time dashboard built in Python using **Streamlit** to visualize KPIs and month-over-month growth directly from the database.
+* **Presentation:** A full-stack, real-time dashboard built in Python using **Streamlit** to visualize KPIs,  month-over-month growth, & query history directly from the database.
 
 ---
 
