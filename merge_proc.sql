@@ -9,7 +9,7 @@ BEGIN
     MERGE INTO SALES_ANALYTICS.CORE.DIM_PRODUCTS AS target
     USING (
         SELECT 
-            id AS product_id,
+            HASH(id, title, description, category) AS product_hash,
             title,
             price,
             category,
@@ -20,16 +20,17 @@ BEGIN
     ) AS source
     ON target.product_id = source.product_id
     
-    WHEN MATCHED THEN
+    WHEN MATCHED and target.product_hash != source.product_hash THEN
         UPDATE SET 
             target.price = source.price,
             target.rating_score = source.rating_score,
             target.rating_count = source.rating_count,
+            target.product_hash = source.product_hash,
             target.updated_at = CURRENT_TIMESTAMP()
             
     WHEN NOT MATCHED THEN
-        INSERT (product_id, title, price, category, description, rating_score, rating_count, created_at)
-        VALUES (source.product_id, source.title, source.price, source.category, source.description, source.rating_score, source.rating_count, CURRENT_TIMESTAMP());
+        INSERT (product_id, title, price, category, description, rating_score, rating_count, product_hash, created_at)
+        VALUES (source.product_id, source.title, source.price, source.category, source.description, source.rating_score, source.rating_count, source.product_hash, CURRENT_TIMESTAMP());
 
     RETURN 'Success: Products merged successfully.';
 END;

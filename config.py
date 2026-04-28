@@ -33,10 +33,11 @@ class Config:
     # LOCAL PATHS
     BASE_DIR = Path(__file__).resolve().parent
     DATA_DIR = BASE_DIR / "data"
+    SAMPLE_DIR = BASE_DIR / "sample_data" 
     
     # CREATE DATA DIRECTORY IF IT DOESN'T EXIST
     DATA_DIR.mkdir(exist_ok=True)
-
+    SAMPLE_DIR.mkdir(exist_ok=True)
 # INSTANTIATE CONFIG FOR USE IN OTHER FILES
 config = Config()
 

@@ -1,7 +1,9 @@
 import logging
 import os
+import pandas as pd
 import snowflake.connector
 from config import Config, get_snowflake_connection
+import streamlit as st
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -92,3 +94,21 @@ def load_sales_to_snowflake(file_name: str, table_name: str, stage_name: str, co
     finally:
         cur.close()
         conn.close()
+
+def load_offline_data(query: str, params: tuple, fallback_csv: str, conn):
+    """
+    Tries to pull from Snowflake. 
+    If conn is None or query fails, loads the local CSV instead.
+    """
+    if conn:
+            try:
+                return pd.read_sql(query,  params=params, con=conn )
+            except Exception as e:
+                st.sidebar.warning(f"Live query failed: {e}. Switching to Offline Mode.")
+    # Fallback to Local CSV
+    csv_path = os.path.join(Config.SAMPLE_DIR, fallback_csv)
+    if os.path.exists(csv_path):
+        return pd.read_csv(csv_path)
+    else:
+        logging.error(f"Missing local data file: {fallback_csv}")
+        return pd.DataFrame()
