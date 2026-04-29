@@ -90,7 +90,7 @@ Insider Threat (PII Access) | Masking-Ready Schema  |   Although this project us
 ### 3. Infrastructure Threats
 ThreatMitigation StrategyHow it works
 "Shadow" Data Access    Centralized Audit Logging   
-**Design Choice Note:** I opted for View-based Transformations rather than physical tables in the Analytics layer. This reduces storage costs and ensures that the dashboard always reflects the most recent data loaded into the Core layer.
+
 
 Threat                      | Mitigation Strategy   |   How it works
 --------------------------------------------------------------------------------------------------------------------------------
@@ -104,3 +104,4 @@ Configuration Drift         | Infrastructure as     | Because the environment is
                             |                       | Immutable Source of Truth for the warehouse state.
 ----------------------------|--------------------------------------------------------------------------------------------------   
 
+**Design Choice Note:** I opted for View-based Transformations rather than physical tables in the Analytics layer. This reduces storage costs and ensures that the dashboard always reflects the most recent data loaded into the Core layer.
