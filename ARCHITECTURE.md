@@ -46,4 +46,61 @@ The repository includes a centralized setup.sql (and associated DDL scripts) tha
 🔄 The "Pipeline as Code" Philosophy
 By coupling the Snowflake setup scripts with the Python-based Streamlit dashboard and ingestion logic, the entire stack—from the database engine to the end-user visualization—is defined in the codebase. This allows a new engineer to clone the repository and, with valid credentials, deploy the full analytics suite in minutes.
 
+## 🕵️ Threat Model & Risk Mitigation
+This project was designed to defend against common cloud data infrastructure attacks. By shifting security "left" into the architecture, we mitigate several high-criticality risks.
+
+### 1. Identity & Access Threats
+
+Threat                      | Mitigation Strategy   |   How it works
+--------------------------------------------------------------------------------------------------------------------------------
+Credential Theft / Phishing | RSA Key-Pair Auth     |   Even if an attacker discovers the ACCOUNT_NAME and USER_NAME, there is 
+                            |                       |   no password to steal. Access requires the encrypted private key file,
+                            |                       |   which is never stored in the database or transmitted over the wire.
+----------------------------|-----------------------|-----------------------------------------------------------------------
+Credential Leaks (GitHub)   | Asymmetric Handshake  |   Since the pipeline uses JWTs signed locally, no "secrets" are ever
+                            |                       |    committed to code. The public key is an open identifier; the private key
+                            |                       |     stays in the local environment's secure vault.
+----------------------------|--------------------------------------------------------------------------------------------------   
+Blast Radius Escalation     |   Functional RBAC     |   If the INGESTOR_ROLE is somehow compromised, the attacker is "jailed"
+                            |                       |    within the Staging schema. They cannot delete the Analytics views,  
+                            |                       |    access billing data, or create new users.
+----------------------------|-----------------------|---------------------------------------------------------------------------
+
+
+
+### 2. Data Integrity & Injection 
+
+Threat                      | Mitigation Strategy   |   How it works
+--------------------------------------------------------------------------------------------------------------------------------
+SQL Injection               | Parameterized Queries |   The Streamlit-to-Snowflake connection utilizes Parameterized Bindings
+                            |                       |   (%s). User inputs (like Category filters) are never concatenated
+                            |                       |   directly into SQL strings, neutralizing the risk of malicious code
+                            |                       |   injection.
+----------------------------|-----------------------|-----------------------------------------------------------------------
+Unauthorized Data           | Read-Only Logic Layer |   By using SQL Views for the Analytics layer, we ensure that the "Source of
+Modification                |                       |    Truth" in the Core tables cannot be modified by the dashboard 
+                            |                       |     role. Analysts have a "window" into the data, not a "handle" on it
+----------------------------|--------------------------------------------------------------------------------------------------   
+Insider Threat (PII Access) | Masking-Ready Schema  |   Although this project uses public sales data, the architecture supports 
+                            |                       |   Dynamic Data Masking. This ensures that even high-privileged developers 
+                            |                       |   can be restricted from seeing raw PII unless their role explicitly 
+                            |                       |   requires it for a "Right to Know" task.
+----------------------------|-----------------------|---------------------------------------------------------------------------
+
+### 3. Infrastructure Threats
+ThreatMitigation StrategyHow it works
+"Shadow" Data Access    Centralized Audit Logging   
 **Design Choice Note:** I opted for View-based Transformations rather than physical tables in the Analytics layer. This reduces storage costs and ensures that the dashboard always reflects the most recent data loaded into the Core layer.
+
+Threat                      | Mitigation Strategy   |   How it works
+--------------------------------------------------------------------------------------------------------------------------------
+"Shadow" Data Access        | Centralized Audit     | Every query executed by the Python pipeline is logged in Snowflake's    
+                            | Logging               | QUERY_HISTORY. Any deviation from normal behavior (e.g., a sudden spike 
+                            |                       | in data volume or unauthorized schema scans) is immediately visible on the 
+                            |                       | Audit Dashboard.
+ ---------------------------|-----------------------|-----------------------------------------------------------------------
+Configuration Drift         | Infrastructure as     | Because the environment is defined via SQL scripts, any "manual" changes 
+                            | Code (IAC)            | made in the UI are easily detectable. The code acts as the      
+                                                    | Immutable Source of Truth for the warehouse state.
+----------------------------|--------------------------------------------------------------------------------------------------   
+
