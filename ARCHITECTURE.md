@@ -101,6 +101,6 @@ Threat                      | Mitigation Strategy   |   How it works
  ---------------------------|-----------------------|-----------------------------------------------------------------------
 Configuration Drift         | Infrastructure as     | Because the environment is defined via SQL scripts, any "manual" changes 
                             | Code (IAC)            | made in the UI are easily detectable. The code acts as the      
-                                                    | Immutable Source of Truth for the warehouse state.
+                            |                       | Immutable Source of Truth for the warehouse state.
 ----------------------------|--------------------------------------------------------------------------------------------------   
 
